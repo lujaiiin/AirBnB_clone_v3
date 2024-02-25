@@ -1,53 +1,70 @@
 #!/usr/bin/python3
 """Modules"""
-from flask import Blueprint, request, jsonify
-from models import State, db
+from flask import jsonify
+from flask import abort
+from flask import request
+from flask import make_response
+from models import storage
+from models.state import State
+from api.v1.views import app_views
 
-states_bp = Blueprint('states', __name__)
 
-@states_bp.route('/states', methods=['GET'])
+@app_views.route('/states', methods=['GET'], strict_slashes=False)
 def get_states():
-    states = State.query.all()
-    return jsonify([state.to_dict() for state in states])
+    """get_status"""
+    st = storage.all(State)
+    state_list = []
+    for st in st.values():
+        state_list.append(st.to_dict())
+    return jsonify(state_list)
 
-@states_bp.route('/states/<int:state_id>', methods=['GET'])
+
+@app_views.route('/states/<state_id>', methods=['GET'], strict_slashes=False)
 def get_state(state_id):
-    state = State.query.get(state_id)
-    if state is None:
-        return jsonify({'error': 'State not found'}),   404
-    return jsonify(state.to_dict())
+    """object"""
+    st = storage.get(State, state_id)
+    if st is None:
+        abort(404)
+    return jsonify(st.to_dict())
 
-@states_bp.route('/states/<int:state_id>', methods=['DELETE'])
+
+@app_views.route('/states/<state_id>', methods=['DELETE'],
+                 strict_slashes=False)
 def delete_state(state_id):
-    state = State.query.get(state_id)
+    """delete"""
+    state = storage.get(State, state_id)
     if state is None:
-        return jsonify({'error': 'State not found'}),   404
-    db.session.delete(state)
-    db.session.commit()
-    return jsonify({}),   200
+        abort(404)
+    storage.delete(state)
+    storage.save()
+    return make_response(jsonify({}), 200)
 
-@states_bp.route('/states', methods=['POST'])
-def create_state():
-    if not request.is_json:
-        return jsonify({'error': 'Not a JSON'}),   400
+
+@app_views.route('/states', methods=['POST'], strict_slashes=False)
+def post_state():
+    """create"""
+    if not request.get_json():
+        abort(400, description="Not a JSON")
+    if 'name' not in request.get_json():
+        abort(400, description="Missing name")
     data = request.get_json()
-    if 'name' not in data:
-        return jsonify({'error': 'Missing name'}),   400
-    new_state = State(name=data['name'])
-    db.session.add(new_state)
-    db.session.commit()
-    return jsonify(new_state.to_dict()),   201
+    instance = State(**data)
+    instance.save()
+    return make_response(jsonify(instance.to_dict()), 201)
 
-@states_bp.route('/states/<int:state_id>', methods=['PUT'])
-def update_state(state_id):
-    state = State.query.get(state_id)
-    if state is None:
-        return jsonify({'error': 'State not found'}),   404
-    if not request.is_json:
-        return jsonify({'error': 'Not a JSON'}),   400
+
+@app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
+def put_state(state_id):
+    """update"""
+    state = storage.get(State, state_id)
+    if not state:
+        abort(404)
+    if not request.get_json():
+        abort(400, description="Not a JSON")
+    ignore = ['id', 'created_at', 'updated_at']
     data = request.get_json()
     for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
+        if key not in ignore:
             setattr(state, key, value)
-    db.session.commit()
-    return jsonify(state.to_dict()),   200
+    storage.save()
+    return make_response(jsonify(state.to_dict()), 200)
