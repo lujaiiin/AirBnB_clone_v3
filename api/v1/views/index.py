@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 """Modules"""
 from flask import jsonify
-from api.v1.views import app_views 
+from api.v1.views import app_views
+from models import storage
+
 
 @app_views.route('/status', methods=['GET'])
 def status():
@@ -13,7 +15,7 @@ def stats():
     """get stats fun"""
     response = {}
     CY = {
-            "Amenity": "amenities",
+	    "Amenity": "amenities",
             "City": "cities",
             "Place": "places",
             "Review": "reviews",
