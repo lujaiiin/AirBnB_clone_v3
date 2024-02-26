@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" view """
+""" users view """
 from flask import jsonify, abort, request, make_response
 from models import storage
 from models.user import User
@@ -8,7 +8,7 @@ from api.v1.views import app_views
 
 @app_views.route('/users', methods=['GET'], strict_slashes=False)
 def get_users():
-    """User objects """
+    """ Retrieves """
     users = storage.all(User)
     user_list = []
     for user in users.values():
@@ -18,7 +18,7 @@ def get_users():
 
 @app_views.route('/users/<user_id>', methods=['GET'], strict_slashes=False)
 def get_user(user_id):
-    """ User object """
+    """ Retrieves a User object """
     user = storage.get(User, user_id)
     if user is None:
         abort(404)
@@ -28,7 +28,7 @@ def get_user(user_id):
 @app_views.route('/users/<user_id>', methods=['DELETE'],
                  strict_slashes=False)
 def delete_user(user_id):
-    """ Deletes  """
+    """ Delete """
     user = storage.get(User, user_id)
     if user is None:
         abort(404)
@@ -39,7 +39,7 @@ def delete_user(user_id):
 
 @app_views.route('/users', methods=['POST'], strict_slashes=False)
 def post_user():
-    """ Createing """
+    """ Creates """
     if not request.get_json():
         abort(400, description="Not a JSON")
     if 'email' not in request.get_json():
@@ -54,7 +54,7 @@ def post_user():
 
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
 def put_user(user_id):
-    """ Updateing """
+    """ Updates """
     user = storage.get(User, user_id)
     if not user:
         abort(404)
