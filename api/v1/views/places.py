@@ -1,82 +1,110 @@
 #!/usr/bin/python3
-"""view"""
-from api.v1.views import app_views
-from flask import abort, jsonify, make_response, request
+""" view """
+from flask import jsonify, abort, request, make_response
 from models import storage
-from models.city import City
 from models.place import Place
+from api.v1.views import app_views
+from models.city import City
 from models.user import User
 
 
-@app_views.route('/cities/<string:city_id>/places', methods=['GET'],
+@app_views.route('/cities/<city_id>/places', methods=['GET'],
                  strict_slashes=False)
 def get_places(city_id):
-    """get cities"""
+    """ Retrieves """
     city = storage.get(City, city_id)
-    if city is None:
+    if not city:
         abort(404)
-    places = []
+    place_list = []
     for place in city.places:
-        places.append(place.to_dict())
-    return jsonify(places)
+        place_list.append(place.to_dict())
+    return jsonify(place_list)
 
 
-@app_views.route('/places/<string:place_id>', methods=['GET'],
-                 strict_slashes=False)
+@app_views.route('/places/<place_id>', methods=['GET'], strict_slashes=False)
 def get_place(place_id):
-    """get place"""
+    """ Retrieves """
     place = storage.get(Place, place_id)
-    if place is None:
+    if not place:
         abort(404)
     return jsonify(place.to_dict())
 
 
-@app_views.route('/places/<string:place_id>', methods=['DELETE'],
+@app_views.route('/places/<place_id>', methods=['DELETE'],
                  strict_slashes=False)
 def delete_place(place_id):
-    """deletes"""
+    """ Deletes a Place  """
     place = storage.get(Place, place_id)
-    if place is None:
+    if not place:
         abort(404)
-    place.delete()
+    storage.delete(place)
     storage.save()
-    """default"""
-    return (jsonify({}), 200)
+    return make_response(jsonify({}), 200)
 
 
-@app_views.route('/cities/<string:city_id>/places/', methods=['POST'],
+@app_views.route('/cities/<city_id>/places', methods=['POST'],
                  strict_slashes=False)
 def post_place(city_id):
-    """create"""
+    """ Creates """
     city = storage.get(City, city_id)
-    if city is None:
+    if not city:
         abort(404)
     if not request.get_json():
-        return make_response(jsonify({'error': 'Not a JSON'}), 400)
+        abort(400, description="Not a JSON")
     if 'user_id' not in request.get_json():
-        return make_response(jsonify({'error': 'Missing user_id'}), 400)
-    dic = request.get_json()
-    if not storage.get(User, dic.get("user_id")):
-        abort(404)
+        abort(400, description="Missing user_id")
     if 'name' not in request.get_json():
-        return make_response(jsonify({'error': 'Missing name'}), 400)
-    dic['city_id'] = city_id
-    place = Place(**dic)
-    place.save()
-    return make_response(jsonify(place.to_dict()), 201)
-
-
-@app_views.route('/places/<string:place_id>', methods=['PUT'],
-                 strict_slashes=False)
-def put_place(place_id):
-    """update"""
-    place = storage.get(Place, place_id)
-    if place is None:
+        abort(400, description="Missing name")
+    data = request.get_json()
+    user = storage.get(User, data['user_id'])
+    if not user:
         abort(404)
-    if not request.get_json():
-        return make_response(jsonify({'error': 'Not a JSON'}), 400)
-    for attr, val in request.get_json().items():
-        if attr not in ['id', 'user_id', 'created_at', 'updated_at']:
-            setattr(place, attr, val)
-    place.save()
-    return jsonify(place.to_dict()), 200
+    data['city_id'] = city_id
+    instance = Place(**data)
+    instance.save()
+    return make_response(jsonify(instance.to_dict()), 201)
+
+
+@app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
+def put_place(place_id):
+    """ Updates """
+    data = request.get_json()
+
+    if data is None:
+        error_dict = {"error": "Not a JSON"}
+        return jsonify(error_dict), 400
+
+    single_place = storage.get("Place", place_id)
+
+    if single_place is None:
+        abort(404)
+
+    if 'description' in data:
+        setattr(single_place, 'description', data['description'])
+
+    if 'number_rooms' in data:
+        setattr(single_place, 'number_rooms', data['number_rooms'])
+
+    if 'number_bathrooms' in data:
+        setattr(single_place, 'number_bathrooms', data['number_bathrooms'])
+
+    if 'max_guest' in data:
+        setattr(single_place, 'max_guest', data['max_guest'])
+
+    if 'price_by_night' in data:
+        setattr(single_place, 'price_by_night', data['price_by_night'])
+
+    if 'latitude' in data:
+        setattr(single_place, 'latitude', data['latitude'])
+
+    if 'longitude' in data:
+        setattr(single_place, 'longitude', data['longitude'])
+
+    if 'amenity_ids' in data:
+        setattr(single_place, 'amenity_ids', data['amenity_ids'])
+
+    setattr(single_place, 'name', data['name'])
+    single_place.save()
+    storage.save()
+
+    return jsonify(single_place.to_dict())
