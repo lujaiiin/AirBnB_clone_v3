@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" view """
+"""Modules"""
 from flask import jsonify, abort, request, make_response
 from models import storage
 from models.place import Place
@@ -11,7 +11,7 @@ from models.user import User
 @app_views.route('/places/<place_id>/reviews', methods=['GET'],
                  strict_slashes=False)
 def get_reviews(place_id):
-    """ Retrieves specific Place """
+    """Retye"""
     place = storage.get(Place, place_id)
     if not place:
         abort(404)
@@ -23,7 +23,7 @@ def get_reviews(place_id):
 
 @app_views.route('/reviews/<review_id>', methods=['GET'], strict_slashes=False)
 def get_review(review_id):
-    """ Review object """
+    """fof"""
     review = storage.get(Review, review_id)
     if not review:
         abort(404)
