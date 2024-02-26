@@ -10,7 +10,7 @@ from models.place import Place
 @app_views.route('/places/<string:place_id>/amenities', methods=['GET'],
                  strict_slashes=False)
 def get_placeam(place_id):
-    """get"""
+    """getplac"""
     place = storage.get("Place", place_id)
     if place is None:
         abort(404)
@@ -43,7 +43,7 @@ def delete_placeam(place_id, amenity_id):
 @app_views.route('/places/<string:place_id>/amenities/<string:amenity_id>',
                  methods=['POST'], strict_slashes=False)
 def post_placeam(place_id, amenity_id):
-    """amin"""
+    """amintyty"""
     place = storage.get("Place", place_id)
     amenity = storage.get("Amenity", amenity_id)
     if place is None or amenity is None:
