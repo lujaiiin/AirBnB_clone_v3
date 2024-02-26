@@ -1,33 +1,38 @@
 #!/usr/bin/python3
-"""app"""
-
-from os import getenv
+""" Flask web application """
+from flask import Flask, blueprints, jsonify
 from models import storage
 from api.v1.views import app_views
-from flask import Flask, Blueprint, jsonify
 from flask_cors import CORS
+import os
+
+HBNB_API_HOST = os.getenv('HBNB_API_HOST')
+HBNB_API_PORT = os.getenv('HBNB_API_PORT')
+
+
+if HBNB_API_HOST is None:
+    HBNB_API_HOST = '0.0.0.0'
+if HBNB_API_PORT is None:
+    HBNB_API_PORT = 5000
 
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
-CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
+cros = CORS(app, resources={r"/api/*": {"origins": "0.0.0.0"}})
 
 
 @app.teardown_appcontext
-def teardown_app(exception):
-    """request"""
+def teardown_db(exception):
+    """tdown"""
     storage.close()
 
 
 @app.errorhandler(404)
-def not_found(error):
-    """ 404 page"""
-    return jsonify({'error': 'Not found'}), 404
+def page_not_found(error):
+    """  404  """
+    status = {"error": "Not found"}
+    return jsonify(status), 404
 
 
-if __name__ == "__main__":
-    """Main"""
-    host = getenv('HBNB_API_HOST', '0.0.0.0')
-    port = getenv('HBNB_API_PORT', 5000)
-    app.run(host=host, port=port, threaded=True)
-    
+if __name__ == '__main__':
+    app.run(host=HBNB_API_HOST, port=HBNB_API_PORT, threaded=True)
