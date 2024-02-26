@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""places_amenities.py"""
+"""Modules"""
 from api.v1.views import app_views
 from flask import abort, jsonify
 from models import storage, storage_t
@@ -9,8 +9,8 @@ from models.place import Place
 
 @app_views.route('/places/<string:place_id>/amenities', methods=['GET'],
                  strict_slashes=False)
-def get_place_amenities(place_id):
-    """get amenity information for a specified place"""
+def get_placeam(place_id):
+    """get"""
     place = storage.get("Place", place_id)
     if place is None:
         abort(404)
@@ -23,8 +23,8 @@ def get_place_amenities(place_id):
 
 @app_views.route('/places/<string:place_id>/amenities/<string:amenity_id>',
                  methods=['DELETE'], strict_slashes=False)
-def delete_place_amenity(place_id, amenity_id):
-    """deletes obj"""
+def delete_placeam(place_id, amenity_id):
+    """delete"""
     place = storage.get("Place", place_id)
     amenity = storage.get("Amenity", amenity_id)
     if place is None or amenity is None:
@@ -42,8 +42,8 @@ def delete_place_amenity(place_id, amenity_id):
 
 @app_views.route('/places/<string:place_id>/amenities/<string:amenity_id>',
                  methods=['POST'], strict_slashes=False)
-def post_place_amenity(place_id, amenity_id):
-    """adds an amenity object to a place"""
+def post_placeam(place_id, amenity_id):
+    """amin"""
     place = storage.get("Place", place_id)
     amenity = storage.get("Amenity", amenity_id)
     if place is None or amenity is None:
