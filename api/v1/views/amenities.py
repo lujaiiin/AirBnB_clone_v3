@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" view """
+""" Modules"""
 from flask import jsonify, abort, request, make_response
 from models import storage
 from models.amenity import Amenity
@@ -10,7 +10,7 @@ from models.city import City
 
 @app_views.route('/amenities', methods=['GET'], strict_slashes=False)
 def get_amenities():
-    """ Re"""
+    """gety"""
     amenities = storage.all(Amenity)
     amenity_list = []
     for amenity in amenities.values():
