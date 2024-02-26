@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""view"""
+"""Modules"""
 from models import storage
 from api.v1.views import app_views
 from flask import Flask, jsonify
@@ -17,13 +17,13 @@ app.register_blueprint(app_views)
 
 @app.teardown_appcontext
 def teardown_app(exception):
-    """request"""
+    """app"""
     storage.close()
 
 
 @app.errorhandler(404)
 def not_found(error):
-    """404 page"""
+    """error"""
     return jsonify({'error': 'Not found'}), 404
 
 
